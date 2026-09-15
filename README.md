@@ -1,4 +1,45 @@
-# TRACKO-2
+# TRACKO 🚦
+
+### AI-Powered Urban Traffic & Mobility Intelligence Platform
+
+**Tracko** is an AI-powered urban mobility platform designed to help cities monitor traffic, identify road-level issues, and improve transportation management through centralized, data-driven intelligence.
+
+The platform brings traffic monitoring, AI-based road detection, public transport information, geospatial visualization, and stakeholder-specific dashboards into one unified system.
+
+## 🚀 Key Features
+
+- 🚦 **Traffic Intelligence** — Monitor traffic conditions, incidents, alerts, and congestion.
+- 🤖 **AI Road Detection** — Detect issues such as potholes, construction, and road obstructions using computer vision.
+- 🗺️ **Live Map Intelligence** — Visualize incidents and transportation information geographically.
+- 🚌 **Public Transport Monitoring** — Track transport activity and use mobility data for better decision-making.
+- 📊 **Analytics Dashboard** — Convert transportation data into clear visual insights.
+- 👥 **Stakeholder Workspaces** — Dedicated interfaces for Traffic Centres, Drivers & Citizens, and Students & Parents.
+- ⚡ **Real-Time Ready Architecture** — Designed to integrate live transport feeds and continuous AI detection events.
+
+## 🛠️ Tech Stack
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Google Maps API
+- SWR
+- Recharts
+- Custom SVG Components
+
+## 🧠 AI Vision
+
+Tracko's AI sensing layer is designed to process bus-camera footage using **YOLO-based object detection**. Detected road issues can be converted into structured events containing information such as detection type, confidence, timestamp, vehicle and location, which can then be visualized on the Tracko platform.
+
+## 🎯 SIH 2026
+
+Tracko is developed as a prototype for **Smart India Hackathon (SIH) 2026**, focusing on intelligent urban mobility, AI-powered infrastructure monitoring, and centralized traffic management.
+
+### Team
+**Young Minds**
+
+
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
 
@@ -23,11 +64,3 @@ pnpm dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-## Learn More
-
-To learn more, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
