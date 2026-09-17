@@ -100,7 +100,12 @@ export const NAV_ITEMS = {
     { name: "Navigation", path: "/driver/dashboard", icon: "navigation" },
   ],
   citizen: [
-    { name: "Route Search", path: "/citizen/dashboard", icon: "search" },
+    { name: "Live City Overview", path: "/citizen/dashboard", icon: "layout-dashboard" },
+    { name: "Issues Near You", path: "/citizen/issues", icon: "search" },
+    { name: "AI Area Report", path: "/citizen/ai-report", icon: "zap" },
+    { name: "Report a Problem", path: "/citizen/report", icon: "file-text" },
+    { name: "Track Complaints", path: "/citizen/complaints", icon: "clock" },
+    { name: "Live Transit & Hazards", path: "/citizen/transit", icon: "bus" },
   ],
   studentParent: [
     { name: "Bus Tracking", path: "/student-parent/dashboard", icon: "bus" },

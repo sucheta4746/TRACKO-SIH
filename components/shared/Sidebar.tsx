@@ -20,6 +20,7 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
+  Clock3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -32,6 +33,7 @@ const iconMap = {
   search: Search,
   bus: Bus,
   zap: Zap,
+  clock: Clock3,
 };
 
 interface NavItem {
@@ -124,7 +126,7 @@ export function Sidebar({ navItems, roleId, roleName, theme = "dark" }: SidebarP
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap] || LayoutDashboard;
-            const isActive = pathname === item.path;
+            const isActive = pathname === item.path || (item.path !== "/" && pathname.startsWith(`${item.path}/`));
 
             return (
               <Link
@@ -181,6 +183,7 @@ export function Sidebar({ navItems, roleId, roleName, theme = "dark" }: SidebarP
         )}>
           <Link
             href="/"
+            onClick={() => setIsMobileOpen(false)}
             className={cn(
               "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
               isCollapsed && "justify-center",

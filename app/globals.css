@@ -145,6 +145,36 @@
   }
 }
 
+/* Citizen workspace keeps route planning light enough to scan inside the dark service shell. */
+.citizen-dashboard .bg-white {
+  background-color: rgb(15 27 49 / 0.92);
+}
+
+.citizen-dashboard .border-slate-200 {
+  border-color: rgb(51 65 85 / 0.75);
+}
+
+.citizen-dashboard .text-slate-900 {
+  color: rgb(241 245 249);
+}
+
+.citizen-dashboard .text-slate-700 {
+  color: rgb(203 213 225);
+}
+
+.citizen-dashboard .text-slate-500 {
+  color: rgb(148 163 184);
+}
+
+.citizen-dashboard .bg-slate-50,
+.citizen-dashboard .bg-slate-100 {
+  background-color: rgb(30 41 59 / 0.72);
+}
+
+.citizen-dashboard input::placeholder {
+  color: rgb(148 163 184);
+}
+
 /* Custom animations */
 @keyframes pulse-slow {
   0%, 100% { opacity: 1; }

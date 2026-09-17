@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Car, Bus, Truck } from "lucide-react";
+import { Car, Bus, Truck, X } from "lucide-react";
 
 interface Vehicle {
   id: string;
@@ -34,7 +34,16 @@ const vehicleColors = {
 
 export function AnimatedVehicles({ vehicles: initialVehicles, theme = "dark" }: AnimatedVehiclesProps) {
   const [vehicles, setVehicles] = useState(initialVehicles);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const isDark = theme === "dark";
+  const latitudes = vehicles.map((vehicle) => vehicle.lat);
+  const longitudes = vehicles.map((vehicle) => vehicle.lng);
+  const minLat = Math.min(...latitudes);
+  const maxLat = Math.max(...latitudes);
+  const minLng = Math.min(...longitudes);
+  const maxLng = Math.max(...longitudes);
+  const latitudeRange = Math.max(maxLat - minLat, 0.001);
+  const longitudeRange = Math.max(maxLng - minLng, 0.001);
 
   // Simulate vehicle movement
   useEffect(() => {
@@ -100,13 +109,19 @@ export function AnimatedVehicles({ vehicles: initialVehicles, theme = "dark" }: 
           {/* Animated vehicles */}
           {vehicles.map((vehicle, index) => {
             const Icon = vehicleIcons[vehicle.type];
-            // Distribute vehicles across the map area
-            const x = 10 + ((index * 25) % 80);
-            const y = 15 + ((index * 30) % 70);
+            const x = 8 + ((vehicle.lng - minLng) / longitudeRange) * 84;
+            const y = 88 - ((vehicle.lat - minLat) / latitudeRange) * 76;
             
             return (
               <div
                 key={vehicle.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`${vehicle.type} on ${vehicle.route}, ${Math.round(vehicle.speed)} miles per hour`}
+                onClick={() => setSelectedVehicle(vehicle)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") setSelectedVehicle(vehicle);
+                }}
                 className={cn(
                   "absolute w-8 h-8 -translate-x-1/2 -translate-y-1/2",
                   "transition-all duration-1000 ease-out",
@@ -156,6 +171,29 @@ export function AnimatedVehicles({ vehicles: initialVehicles, theme = "dark" }: 
             );
           })}
 
+          {selectedVehicle && (
+            <div className={cn(
+              "absolute left-3 top-3 z-10 min-w-[170px] rounded-lg border p-3 shadow-xl",
+              isDark ? "border-slate-700 bg-slate-950/95" : "border-slate-200 bg-white/95"
+            )}>
+              <button
+                type="button"
+                aria-label="Close vehicle details"
+                onClick={() => setSelectedVehicle(null)}
+                className={cn("absolute right-2 top-2", isDark ? "text-slate-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+              <p className={cn("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-slate-500" : "text-slate-400")}>
+                Live {selectedVehicle.type}
+              </p>
+              <p className={cn("mt-1 text-sm font-semibold", isDark ? "text-white" : "text-slate-900")}>{selectedVehicle.route}</p>
+              <p className={cn("mt-1 text-xs", isDark ? "text-slate-400" : "text-slate-500")}>
+                {Math.round(selectedVehicle.speed)} mph · heading {Math.round(selectedVehicle.heading)}°
+              </p>
+            </div>
+          )}
+
           {/* Vehicle count badge */}
           <div className={cn(
             "absolute bottom-3 right-3 px-3 py-1.5 rounded-full text-sm font-medium",
@@ -168,7 +206,7 @@ export function AnimatedVehicles({ vehicles: initialVehicles, theme = "dark" }: 
         </div>
 
         {/* Vehicle stats */}
-        <div className="grid grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-3 gap-2 mt-4">
           {[
             { type: "car", label: "Cars", count: vehicles.filter(v => v.type === "car").length },
             { type: "bus", label: "Buses", count: vehicles.filter(v => v.type === "bus").length },

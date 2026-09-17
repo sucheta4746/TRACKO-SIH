@@ -37,6 +37,7 @@ import {
   Car,
   AlertTriangle,
 } from "lucide-react";
+import { AuthorityAnalytics } from "@/components/shared/AuthorityAnalytics";
 
 const incidentTypeData = [
   { name: "Accidents", value: 35, color: "#EF4444" },
@@ -68,7 +69,7 @@ const responseTimeData = [
   { day: "Sun", avgTime: 2.9, target: 5 },
 ];
 
-export default function AnalyticsPage() {
+function LegacyAnalyticsPage() {
   const [timeRange, setTimeRange] = useState("24h");
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -365,3 +366,5 @@ export default function AnalyticsPage() {
     </div>
   );
 }
+
+export default AuthorityAnalytics;

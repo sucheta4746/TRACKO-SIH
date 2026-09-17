@@ -126,8 +126,16 @@ export default function CitizenDashboard() {
   const activeAlerts = trafficAlerts.filter((a) => a.severity === "high" || a.severity === "medium").slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4">
-      <div className="max-w-2xl mx-auto space-y-4">
+    <div className="citizen-dashboard min-h-screen bg-[#080f20] p-4 text-slate-100 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-5">
+        <section className="animate-slide-up flex flex-col justify-between gap-4 border-b border-slate-800 pb-5 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[.2em] text-cyan-300">Citizen services / overview</p>
+            <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">Move through your city with confidence.</h2>
+            <p className="mt-1 text-sm text-slate-400">Live traffic, nearby issues, and route planning in one view.</p>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-slate-400"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> Live data updated now</div>
+        </section>
         {/* Search Card */}
         <Card className="bg-white border-slate-200 shadow-sm animate-slide-up">
           <CardContent className="p-4">

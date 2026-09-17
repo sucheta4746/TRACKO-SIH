@@ -26,5 +26,5 @@ export function useAIDemonstration(onDetection: (event: ReturnType<typeof create
     }, 1000)
     return () => clearInterval(timer)
   }, [isRunning, onVideoTime])
-  return { isRunning, status, elapsed, start, pause, stop }
+  return { isRunning, status, elapsed, start, pause, stop, onVideoTime }
 }

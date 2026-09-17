@@ -23,6 +23,19 @@ interface TrafficHeatmapProps {
 export function TrafficHeatmap({ intersections, theme = "dark" }: TrafficHeatmapProps) {
   const [selectedIntersection, setSelectedIntersection] = useState<Intersection | null>(null);
   const isDark = theme === "dark";
+  const congestionSummary = [
+    { label: "Clear", count: intersections.filter((intersection) => intersection.congestion < 30).length, color: "bg-emerald-500" },
+    { label: "Moderate", count: intersections.filter((intersection) => intersection.congestion >= 30 && intersection.congestion < 70).length, color: "bg-amber-400" },
+    { label: "Heavy", count: intersections.filter((intersection) => intersection.congestion >= 70).length, color: "bg-red-500" },
+  ];
+  const latitudes = intersections.map((intersection) => intersection.lat);
+  const longitudes = intersections.map((intersection) => intersection.lng);
+  const minLat = Math.min(...latitudes);
+  const maxLat = Math.max(...latitudes);
+  const minLng = Math.min(...longitudes);
+  const maxLng = Math.max(...longitudes);
+  const latitudeRange = Math.max(maxLat - minLat, 0.001);
+  const longitudeRange = Math.max(maxLng - minLng, 0.001);
 
   return (
     <Card className={cn(
@@ -37,7 +50,7 @@ export function TrafficHeatmap({ intersections, theme = "dark" }: TrafficHeatmap
           )}>
             Traffic Heatmap
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap justify-end gap-x-3 gap-y-1">
             {["Free", "Light", "Moderate", "Heavy", "Severe"].map((label, i) => (
               <div key={label} className="flex items-center gap-1.5">
                 <div
@@ -55,6 +68,17 @@ export function TrafficHeatmap({ intersections, theme = "dark" }: TrafficHeatmap
               </div>
             ))}
           </div>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-3" aria-label="Traffic summary">
+          {congestionSummary.map((item) => (
+            <span key={item.label} className={cn("flex items-center gap-1.5 text-xs", isDark ? "text-slate-400" : "text-slate-500")}>
+              <span className={cn("h-2 w-2 rounded-full", item.color)} />
+              {item.count} {item.label}
+            </span>
+          ))}
+          <span className={cn("ml-auto text-xs", isDark ? "text-slate-500" : "text-slate-400")}>
+            Click a junction for details
+          </span>
         </div>
       </CardHeader>
 
@@ -96,13 +120,15 @@ export function TrafficHeatmap({ intersections, theme = "dark" }: TrafficHeatmap
 
           {/* Intersection points */}
           {intersections.map((intersection, index) => {
-            const xPositions = [12.5, 25, 37.5, 50, 62.5, 75, 87.5, 50];
-            const yPositions = [25, 50, 75, 25, 50, 75, 25, 75];
+            const xPosition = 8 + ((intersection.lng - minLng) / longitudeRange) * 84;
+            const yPosition = 88 - ((intersection.lat - minLat) / latitudeRange) * 76;
             
             return (
               <button
                 key={intersection.id}
                 onClick={() => setSelectedIntersection(intersection)}
+                aria-label={`${intersection.name}, ${getCongestionLabel(intersection.congestion)} traffic, ${intersection.congestion}% congestion`}
+                title={`${intersection.name} - ${intersection.congestion}% congestion`}
                 className={cn(
                   "absolute w-6 h-6 -translate-x-1/2 -translate-y-1/2",
                   "rounded-full border-2 border-white/20",
@@ -111,8 +137,8 @@ export function TrafficHeatmap({ intersections, theme = "dark" }: TrafficHeatmap
                   "animate-pulse-slow"
                 )}
                 style={{
-                  left: `${xPositions[index % 8]}%`,
-                  top: `${yPositions[index % 8]}%`,
+                  left: `${xPosition}%`,
+                  top: `${yPosition}%`,
                   backgroundColor: getCongestionColor(intersection.congestion),
                   animationDelay: `${index * 200}ms`,
                 }}

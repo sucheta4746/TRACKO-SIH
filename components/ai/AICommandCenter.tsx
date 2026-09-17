@@ -1,7 +1,7 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, Bot, Check, CircleAlert, Filter, MapPin, RotateCcw, ScanLine } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { AlertTriangle, Bot, Check, CircleAlert, Filter, MapPin, Pause, RotateCcw, ScanLine, Square, Video } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -37,6 +37,7 @@ function PotholeDetectionFeed({
   onStart,
   onPause,
   onStop,
+  onTime,
   latest,
 }: {
   status: AIProcessingStatus
@@ -45,21 +46,38 @@ function PotholeDetectionFeed({
   onStart: () => void
   onPause: () => void
   onStop: () => void
+  onTime: (time: number) => void
   latest?: AIDetectionEvent
 }) {
-  const detectionMarkers = [
-    { id: 'P-01', label: 'Pothole 01', confidence: '92%', left: '31%', top: '52%', activeAt: 5 },
-    { id: 'P-02', label: 'Pothole 02', confidence: '88%', left: '54%', top: '59%', activeAt: 11 },
-    { id: 'P-03', label: 'Pothole 03', confidence: '95%', left: '61%', top: '84%', activeAt: 17 },
-  ]
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [duration, setDuration] = useState(0)
+  const elapsedText = (value: number) => `${Math.floor(value / 60).toString().padStart(2, '0')}:${Math.floor(value % 60).toString().padStart(2, '0')}`
+
+  const start = () => {
+    onStart()
+    videoRef.current?.play().catch(() => onPause())
+  }
+
+  const pause = () => {
+    videoRef.current?.pause()
+    onPause()
+  }
+
+  const stop = () => {
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+    }
+    onStop()
+  }
 
   return (
-    <Card className="overflow-hidden border-cyan-400/20 bg-[#111c31] text-slate-100 shadow-[0_18px_60px_rgba(8,145,178,.12)]">
+    <Card className="overflow-hidden border-white/10 bg-[#111c31] text-slate-100">
       <CardHeader className="flex-row items-center justify-between space-y-0 border-b border-white/10 pb-4">
         <div>
           <CardTitle className="flex items-center gap-2 text-base">
-            <ScanLine className="size-4 text-cyan-300" />
-            Live pothole detection
+            <Video className="size-4 text-violet-300" />
+            Live bus AI feed
           </CardTitle>
           <p className="mt-1 text-xs text-slate-500">
             {bus.busId} · {bus.routeId} {bus.routeName} · front camera
@@ -69,15 +87,81 @@ function PotholeDetectionFeed({
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="relative aspect-[4/5] overflow-hidden bg-black sm:aspect-[16/9]">
+        <div className="relative aspect-video overflow-hidden bg-black">
+          <video
+            ref={videoRef}
+            className="size-full object-contain"
+            playsInline
+            muted
+            preload="metadata"
+            controls
+            onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
+            onTimeUpdate={(event) => onTime(event.currentTarget.currentTime)}
+            onPlay={() => { if (!running) onStart() }}
+            onPause={() => { if (running) onPause() }}
+            onEnded={onStop}
+          >
+            <source src="/demo/pothole11.mp4" type="video/mp4" />
+            Your browser does not support HTML video.
+          </video>
+
+          <div className="absolute left-4 top-4 flex items-center gap-2 text-xs text-slate-200">
+            <span className={`size-2 rounded-full ${running ? 'animate-pulse bg-rose-400' : 'bg-slate-500'}`} />
+            FRONT CAMERA · VIDEO SOURCE
+          </div>
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 p-4 pt-14">
+            <div className="mb-3 flex items-center justify-between font-mono text-xs text-slate-300">
+              <span>{elapsedText(elapsed)} / {duration ? elapsedText(duration) : '--:--'}</span>
+              <span>FRAME {latest?.frameNumber ?? '—'}</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={start} disabled={running}>Start AI demo</Button>
+              <Button size="sm" variant="secondary" onClick={pause} disabled={!running}><Pause data-icon="inline-start" />Pause</Button>
+              <Button size="sm" variant="outline" onClick={stop}><Square data-icon="inline-start" />Stop</Button>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 p-4 text-xs">
+          <span className="text-slate-400">AI MODE: <strong className="text-violet-300">DEMO / SIMULATED AI INFERENCE</strong></span>
+          <span className="text-slate-500">{latest ? `Event at ${formatDateTime(latest.timestamp)}` : 'No detection in current frame'}</span>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+const potholeScanMarkers = [
+  { id: 'P-01', label: 'Pothole 01', confidence: '92%', left: '31%', top: '52%', activeAt: 5 },
+  { id: 'P-02', label: 'Pothole 02', confidence: '88%', left: '54%', top: '59%', activeAt: 11 },
+  { id: 'P-03', label: 'Pothole 03', confidence: '95%', left: '61%', top: '84%', activeAt: 17 },
+]
+
+function SecondaryPotholeScan({ running, elapsed }: { running: boolean; elapsed: number }) {
+  const detectedCount = potholeScanMarkers.filter((marker) => elapsed >= marker.activeAt).length
+
+  return (
+    <Card className="overflow-hidden border-cyan-400/20 bg-[#111c31] text-slate-100 shadow-[0_18px_60px_rgba(8,145,178,.12)]">
+      <CardHeader className="flex-row items-center justify-between space-y-0 border-b border-white/10 pb-4">
+        <div>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ScanLine className="size-4 text-cyan-300" />
+            AI pothole scan
+          </CardTitle>
+          <p className="mt-1 text-xs text-slate-500">Secondary detection asset · simulated vision analysis</p>
+        </div>
+        <Badge variant="outline">{detectedCount}/3 DETECTED</Badge>
+      </CardHeader>
+
+      <CardContent className="p-0">
+        <div className="relative aspect-video overflow-hidden bg-black">
           <img
             src="/demo/pothole2.png"
-            alt="Road image being scanned for potholes"
-            className="size-full object-cover object-center"
+            alt="AI pothole scan reference frame"
+            className="size-full object-cover"
           />
           <div className="pointer-events-none absolute inset-0">
             {running && <div className="absolute inset-x-0 top-0 h-1 animate-[scan-beam_2.4s_ease-in-out_infinite] bg-cyan-300 shadow-[0_0_24px_8px_rgba(103,232,249,.75)]" />}
-            {detectionMarkers.map((marker) => {
+            {potholeScanMarkers.map((marker) => {
               const active = elapsed >= marker.activeAt
               return (
                 <div
@@ -97,18 +181,7 @@ function PotholeDetectionFeed({
           </div>
           <div className="absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-black/85 to-transparent px-4 pb-8 pt-4 text-[10px] font-semibold uppercase tracking-[.18em] text-white">
             <span className="flex items-center gap-2"><span className="size-2 animate-pulse rounded-full bg-cyan-300" />AI road scan</span>
-            <span>{detectionMarkers.filter((marker) => elapsed >= marker.activeAt).length}/3 detected</span>
-          </div>
-          <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-2 bg-gradient-to-t from-black/90 to-transparent px-4 pb-4 pt-10">
-            <Button size="sm" variant="secondary" onClick={running ? onPause : onStart}>
-              {running ? 'Pause scan' : 'Run pothole scan'}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={onStop} className="text-white hover:bg-white/10 hover:text-white">
-              Reset
-            </Button>
-            <span className="ml-auto text-xs text-slate-300">
-              {latest ? `${formatDetectionType(latest.eventType)} · ${formatDateTime(latest.timestamp)}` : `${elapsed}s scan ${running ? 'in progress' : 'ready'}`}
-            </span>
+            <span>{detectedCount}/3 detected</span>
           </div>
         </div>
       </CardContent>
@@ -267,8 +340,10 @@ export function AICommandCenter() {
             onStart={demo.start}
             onPause={demo.pause}
             onStop={demo.stop}
+            onTime={demo.onVideoTime}
             latest={latest}
           />
+          <SecondaryPotholeScan running={demo.isRunning} elapsed={demo.elapsed} />
 
         </div>
 
